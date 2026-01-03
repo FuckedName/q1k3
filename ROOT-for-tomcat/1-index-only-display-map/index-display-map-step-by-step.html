@@ -1,0 +1,1195 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Q1K3</title>
+		<style>
+			#c{display:block;width:100%;image-rendering:optimizeSpeed;image-rendering:pixelated;max-height:100vh;object-fit:contain;}
+		</style>
+	</head>
+	<body>
+		<div id="g">
+			<canvas id=c width=320 height=180></canvas>
+		</div>
+	</body>
+	<script>
+	game_start = () => {		
+		let texture_data = [[64,64,0,2,3,1.4,2,17176,1.3],[64,64,38751,1,18,4,2,2,27,9,65530,0,7,1,-1,9,13,5,52,8,8,65528,39039,4,0,0,0,64,512,15,4,0,0,0,64,64,14],[64,64,38751,1,18,4,2,2,27,9,65530,0,7,1,-1,0,13,64,52,64,8,65531,39039,4,0,0,0,64,512,15,4,0,0,0,64,64,14],[64,64,13119,4,1,0,0,64,64,15,0,24,11,17,50,65523,2,8],[32,32,21839,1,0,2,10,2,11,4,65528,10,25931,4,0,0,0,32,32,14],[32,32,17487,0,1,1,30,30,65528,11,21580,4,0,0,0,32,32,15],[32,32,30015,4,5,0,0,32,32,15,1,5,4,2,2,22,6,65522,0,8],[32,32,8751,1,1,1,8,4,11,5,65524,15,17487,4,0,0,0,64,64,15],[32,32,13119,4,4,0,0,32,32,15,1,10,3,11,6,25,10,64536,64568,65519],[32,32,8751,1,1,1,3,3,4,4,65524,14,21565,1,1,-1,15,1,16,16,65522,7,0,1,-1,0,1,15,16,6,65521,0,4,4,0,0,0,32,32,15],[32,32,8719,2,63506,1,4,0,0,0,32,32,12],[32,32,21295,4,10,0,-4,32,298,10,2,4372,1],[32,32,8463,1,-1,1,35,1,35,4,65522,10,34399,0,-1,6,34,6,65526,2,34399,2,29479,1,4,6,0,0,32,32,5],[32,32,5535,4,0,0,0,128,64,14],[32,32,8463,1,0,0,3,3,4,4,0,10,65521,0,4,4,23,23,10,64885,21551,3,4,16,13,0,11,"::][::",4,0,4,4,26,26,15],[32,32,8751,1,1,1,8,3,11,5,65524,15,17487,0,9,6,14,13,15,65525,4383,4,0,0,0,64,64,12,3,10,11,20267,0,8,"---"],[32,32,17487,4,5,0,0,32,32,15,1,4,4,3,3,22,22,65523,7,30587],[64,64,38767,2,36875,2.5,1,4,10,15,8,39,59,15,15,8463,1,3,30,14,5,15,6,12813,4367,38671,0,20,1,22,6,13119,10,38671,4,0,0,0,64,64,11],[32,32,40975,2,63308,1.5,2,63751,7.3],[64,64,13119,4,17,0,0,64,64,15,0,0,29,64,64,0,0,89,4,4,21,-6,22,24,15],[32,32,13119,4,9,0,0,32,32,15,4,8,6,-22,21,32,15,4,18,0,0,32,32,4],[64,64,13119,0,0,0,64,64,0,0,64271,3,-1,50,33795,0,32,"XXX",4,7,0,0,64,64,6],[64,64,34063,4,7,0,0,64,64,12,2,12554,1],[32,32,65535,4,12,0,0,32,32,9,3,6,30,61455,0,25,"+"],[32,32,5903,4,12,0,0,32,32,9,3,5,14,65529,0,12,"NIИ"],[32,32,64271,0,12,1,7,30,65528,8,63247,4,7,0,0,32,32,8],[32,32,13119,1,1,1,14,14,16,32,56328,15,26399,1,-7,17,14,14,16,32,56328,8,26159,2,29706,1,4,0,0,0,32,320,14],[32,32,33567,1,1,1,6,30,16,31,65526,15,33823,1,9,-14,6,30,16,32,65526,15,29743,2,55625,1.5,4,0,0,0,32,320,15],[32,32,12559,1,1,1,14,14,16,16,65525,7,21295,0,1,1,14,14,65525,0,34399,0,17,17,14,14,65524,0,34399,2,8,1.5],[32,32,9503,4,11,0,0,32,32,12,1,1,1,6,7,6,8,65521,0,4],[32,32,15,4,18,0,16,32,32,15,4,27,0,-16,32,32,10]];
+
+		let time_self = 0;
+		
+		// Movement, Action, Prev/Next, Jump
+		let keymap = {
+				W: 1, p: 1, // Key[W] or ArrowU[p]
+				A: 2, e: 2, // Key[A] or ArrowL[e]ft
+				S: 3, o: 3, // Key[S] or ArrowD[o]wn
+				D: 4, i: 4, // Key[D] or ArrowR[i]ght
+				Q: 5,       // Key[Q]
+				E: 6,       // Key[E]
+				c: 9,       // KeySpa[c]e
+			},
+			keys = [
+				// Unused zeroth key, so we can test the keymap result for truthiness
+				0,
+
+				// WASD/Arrow Keys and prev next have to be set to zero, because we use 
+				// the value (0 or 1) to calculate the move direction or weapon switch
+				0,0,0,0,
+				0,0
+
+				// Following Keys (action, jump) to not have to be set here以下按键（动作、跳跃）不必在此处设置
+				// as they are just tested for truthiness因为它们只是被测试为真值性
+			],
+			key_up = 1,
+			key_down = 3,
+			key_left = 2,
+			key_right = 4,
+			key_prev = 5,
+			key_next = 6,
+			key_action = 7, // ev.button = 0
+			key_jump = 9, // ev.button = 2
+			mouse_x = 0, 
+			mouse_y = 0,
+			last_wheel_event = 0;
+
+		document.onkeydown = (ev) => {
+			let k = keymap[ev.code[6] || ev.code[3]];
+			if (k) {
+				ev.preventDefault();
+				keys[k] = 1;
+			}
+		};
+
+		document.onkeyup = (ev) => {
+			let k = keymap[ev.code[6] || ev.code[3]];
+			if (k) {
+				ev.preventDefault();
+				keys[k] = 0;
+			}
+		};
+
+		document.onwheel = (ev) => {
+			// Allow for one wheel event every 0.1s. This sucks, but prevents free
+			// spinning or touch scrolling mouses (eg. Apple Magic Mouse) from doing
+			// wild things.\\
+			//考虑每0.1秒发生一次车轮事件。这很糟糕，但可以防止自由旋转或触摸滚动鼠标
+			//（例如Apple Magic Mouse）做疯狂的事情。
+			if (game_time - last_wheel_event > 0.1) {
+				keys[key_prev + (ev.deltaY > 1 ? 1 : 0)] = 1;
+				last_wheel_event = game_time;
+			}
+		};
+
+		c.onmousemove = (ev) => {
+			mouse_x += ev.movementX;
+			mouse_y += ev.movementY;
+		};
+
+		c.onmousedown = (ev) => {
+			ev.preventDefault();
+			keys[key_action + ev.button] = 1;
+		};
+
+		c.onmouseup = (ev) => {
+			ev.preventDefault();
+			keys[key_action + ev.button] = 0;
+		};
+
+		// Compress with:
+		// uglifyjs ttt.js --compress --screw-ie8 --mangle toplevel -o ttt.min.js
+		let 
+		ttt=(td, only_this_index = -1,stack_depth = 0) => {
+			return td.filter((d,i) => only_this_index < 0 || i == only_this_index).map(d => {
+				let i = 0,
+					e = document.createElement('canvas'),
+					c = e.getContext('2d'),
+					rgba_from_2byte = (c) => 
+						'rgba(' + [
+							((c>>12)&15) * 17,
+							((c>>8)&15) * 17, 
+							((c>>4)&15) * 17,
+							(c&15)/15
+						].join() + ')',
+					fill_rect = (x, y, w, h, ...colors) =>
+						colors.map((color, j) => {
+							c.fillStyle = rgba_from_2byte(color);
+							c.fillRect(x+[-1,1,0][j], y+[-1,1,0][j], w, h);
+						})
+					;
+				// Set up canvas width and height设置画布宽度和高度
+				e.width = d[i++];
+				e.height = d[i++];
+
+				// Fill with background color填充背景颜色
+				fill_rect(0, 0, e.width, e.height, 0,0, d[i++]);
+
+				// Perform all the steps for this texture
+				while (i < d.length) {
+					let f = [
+						// 0 - rectangle: x, y, width, height, top, bottom, fill
+						(x, y, width, height, top, bottom, fill) => {
+							fill_rect(x, y, width, height, top, bottom, fill)
+						},
+						
+						// 1 - rectangle_multiple: start_x, start_y, width, height, 
+						//                         inc_x, inc_y, top, bottom, fill
+						(sx, sy, w, h, inc_x, inc_y, top, bottom, fill) => {
+							for (let x = sx; x < e.width; x += inc_x) {
+								for (let y = sy; y < e.height; y += inc_y) {
+									fill_rect(x, y, w, h, top, bottom, fill);
+								}
+							}
+						},
+						
+						// 2 - random noise: color, size
+						(color, size) => {
+							for (let x = 0; x < e.width; x += size) {
+								for (let y = 0; y < e.height; y += size) {
+									// Take the color value (first 3 nibbles) and 
+									// randomize the alpha value (last nibble)
+									// between 0 and the input alpha.
+									fill_rect(
+										x, y, size, size, 0, 0, 
+										(color&0xfff0) + Math.random()*(color&15)
+									);
+								}
+							}
+						},
+						
+						// 3 - text: x, y, color, font,size, text
+						(x, y, color, font, size, text) => {
+							c.fillStyle = rgba_from_2byte(color);
+							c.font = size + 'px ' + ['sans-',''][font]+'serif';
+							c.fillText(text, x, y);
+						},
+						
+						// 4 - draw a previous texture
+						// We limit the stack depth here to not end up in an infinite 
+						// loop by accident
+						(texture_index, x, y, w, h, alpha) => {
+							c.globalAlpha = alpha/15;
+							(
+								texture_index < td.length && stack_depth < 16 &&
+								c.drawImage(
+									ttt(td, texture_index, stack_depth+1)[0], 
+									x, y, w, h
+								)
+							);
+							c.globalAlpha = 1;
+						}
+					][d[i++]];
+					f(...d.slice(i, i+=f.length));
+				}
+				return e;
+			});
+		};
+
+		let
+		clamp = (v, min, max) => v < min ? min : (v > max ? max : v),
+		scale = (v, in_min, in_max, out_min, out_max) => out_min + ((out_max) - out_min) * (((v) - in_min) / ((in_max) - in_min)),
+		anglemod = (r) => Math.atan2(Math.sin(r), Math.cos(r)),
+		vec3 = (x = 0, y = 0, z = 0) => ({x, y, z}),
+		vec3_rotate_yaw_pitch = (p, yaw, pitch) => vec3_rotate_y(vec3_rotate_x(p, pitch), yaw),
+		vec3_rotate_y = (p, rad) => vec3(p.z * Math.sin(rad) + p.x * Math.cos(rad), p.y, p.z * Math.cos(rad) - p.x * Math.sin(rad)),
+		vec3_rotate_x = (p, rad) => vec3(p.x, p.y * Math.cos(rad) - p.z * Math.sin(rad), p.y * Math.sin(rad) + p.z * Math.cos(rad)),
+		vec3_2d_angle = (a, b) => Math.atan2(b.x - a.x, b.z - a.z),
+		vec3_clone = (a) => vec3(a.x,a.y,a.z),
+		vec3_length = (a) => Math.hypot(a.x,a.y,a.z),
+		vec3_dist = (a, b) => vec3_length(vec3_sub(a, b)),
+		vec3_dot = (a, b) => (a.x * b.x + a.y * b.y + a.z * b.z),
+		vec3_add = (a, b) => vec3(a.x + b.x, a.y + b.y, a.z + b.z),
+		vec3_sub = (a, b) => vec3(a.x - b.x, a.y - b.y, a.z - b.z),
+		vec3_mul = (a, b) => vec3(a.x * b.x, a.y * b.y, a.z * b.z),
+		vec3_mulf = (a, b) => vec3(a.x * b, a.y * b, a.z * b),
+		vec3_cross = (a, b) => vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x),
+		vec3_normalize = (v) => vec3_mulf(v, 1/vec3_length(v)),
+		vec3_face_normal = (v0, v1, v2) => vec3_normalize(vec3_cross(vec3_sub(v0, v1), vec3_sub(v2, v1)));
+
+		let
+		options = {antialias: false},
+		gl = (c.getContext('webgl', options) || c.getContext('experimental-webgl', options)),
+
+		R_MAX_VERTS = 1024 * 64, // allow 512k verts max
+		R_MAX_LIGHT_V3 = 64,
+
+		// Vertex shader source. This translates the model position & rotation and also
+		// mixes positions of two buffers for animations.
+		R_SOURCE_VS = 
+			'precision highp float;' +
+
+			// Vertex positions, normals and uv coords for the fragment shader
+			'varying vec3 vp,vn;' +
+			'varying vec2 vt;' +
+
+			// Input vertex positions & normals and blend vertex positions & normals
+			'attribute vec3 p,n,p2,n2;' +
+
+			// Input UV coords
+			'attribute vec2 t;' +		
+
+			// Camera position (x, y, z) and aspect ratio (w)
+			'uniform vec4 c;' + 
+
+			// Model position (x, y, z)
+			'uniform vec3 mp;' + 
+
+			// Model rotation (yaw, pitch)
+			'uniform vec2 mr;' + 		
+
+			// Mouse rotation yaw (x), pitch (y)
+			'uniform vec2 m;' +
+
+			// Blend factor between the two vertex positions
+			'uniform float f;' +
+
+			// Generate a rotation Matrix around the x,y,z axis;
+			// Used for model rotation and camera yaw
+			'mat4 rx(float r){' +
+				'return mat4(' +
+					'1,0,0,0,' +
+					'0,cos(r),sin(r),0,' +
+					'0,-sin(r),cos(r),0,' +
+					'0,0,0,1' +
+				');' +
+			'}' +
+
+			'mat4 ry(float r){' +
+				'return mat4(' +
+					'cos(r),0,-sin(r),0,' +
+					'0,1,0,0,' +
+					'sin(r),0,cos(r),0,' +
+					'0,0,0,1' +
+				');' +
+			'}' +
+
+			'mat4 rz(float r){' +
+				'return mat4(' +
+					'cos(r),sin(r),0,0,' +
+					'-sin(r),cos(r),0,0,' +
+					'0,0,1,0,' +
+					'0,0,0,1' +
+				');' +
+			'}' +
+
+			'void main(void){' +
+				// Rotation Matrixes for model rotation
+				'mat4 '+
+					'mry=ry(mr.x),' +
+					'mrz=rz(mr.y);' +
+
+				// Mix vertex positions, rotate and add the model position
+				'vp=(mry*mrz*vec4(mix(p,p2,f),1.)).xyz+mp;' +
+
+				// Mix normals
+				'vn=(mry*mrz*vec4(mix(n,n2,f),1.)).xyz;' +
+
+				// UV coords are handed over to the fragment shader as is
+				'vt=t;' +
+
+				// Final vertex position is transformed by the projection matrix,
+				// rotated around mouse yaw/pitch and offset by the camera position
+				// We use a FOV of 90, so the matrix[0] and [5] are conveniently 1.
+				// (1 / Math.tan((90/180) * Math.PI / 2) === 1)
+				'gl_Position=' +
+					'mat4(' +
+						'1,0,0,0,' +
+						'0,c.w,0,0,' +
+						'0,0,1,1,' +
+						'0,0,-2,0' +
+					')*' + // projection
+					'rx(-m.y)*ry(-m.x)*' +
+					'vec4(vp-c.xyz,1.);' +
+			'}',
+			
+		// Fragment shader source. Calculates the lighting, does some cheesy gamma
+		// correction and reduces the colors of the final output.
+		R_SOURCE_FS = 
+			'precision highp float;' +
+
+			// Vertex positions, normals and uv coords
+			'varying vec3 vp,vn;' +
+			'varying vec2 vt;' +
+
+			'uniform sampler2D s;' +
+
+			// Lights [(x,y,z), [r,g,b], ...]
+			'uniform vec3 l['+R_MAX_LIGHT_V3+'];' +
+
+			'void main(void){' +
+				'gl_FragColor=texture2D(s,vt);' +
+
+				// Debug: no textures
+				// 'gl_FragColor=vec4(1.0,1.0,1.0,1.0);' + 
+
+				// Calculate all lights
+				'vec3 vl;' +
+				'for(int i=0;i<'+R_MAX_LIGHT_V3+';i+=2) {' +
+					'vl+=' +
+						// Angle to normal
+						'max('+ 
+							'dot('+
+								'vn, normalize(l[i]-vp)' +
+							')' +
+						',0.)*' + 
+						'(1./pow(length(l[i]-vp),2.))' + // Inverse distance squared
+						'*l[i+1];' + // Light color/intensity
+				'}' +
+
+				// Debug: full bright lights
+				'vl = vec3(2,2,2);' +
+
+				'gl_FragColor.rgb=floor('+
+					'gl_FragColor.rgb*pow(vl,vec3(0.75))'+ // Light, Gamma
+					'*16.0+0.5'+
+				')/16.0;' + // Reduce final output color for some extra dirty looks
+			'}',
+
+		// 8 properties per vert [x,y,z, u,v, nx,ny,nz]
+		r_buffer = new Float32Array(R_MAX_VERTS*8), 
+		r_num_verts = 0,
+
+		// 2 vec3 per light [(x,y,z), [r,g,b], ...]
+		r_light_buffer = new Float32Array(R_MAX_LIGHT_V3*3), 
+		r_num_lights = 0,
+
+		// Uniform locations
+		r_u_camera,
+		r_u_lights,
+		r_u_mouse,
+		r_u_pos,
+		r_u_rotation,
+		r_u_frame_mix,
+
+		// Vertex attribute location for mixing
+		r_va_p2, r_va_n2,
+
+		// Texture handles
+		r_textures = [],
+
+		// Camera position
+		r_camera = vec3(0, 0,-50),
+		r_camera_pitch = 0.2,
+		r_camera_yaw = 0,
+
+		// We collect all draw calls in an array and draw them all at once at the end
+		// the frame. This way the lights buffer will be completely filled and we
+		// only need to set it once for all geometry
+		r_draw_calls = [],
+
+		r_init = () => {
+			// Create shorthand WebGL function names
+			// let webglShortFunctionNames = {};
+			for (let name in gl) {
+				if (gl[name].length != undefined) {
+					gl[name.match(/(^..|[A-Z]|\d.|v$)/g).join('')] = gl[name];
+					// webglShortFunctionNames[name] = 'gl.' +name.match(/(^..|[A-Z]|\d.|v$)/g).join('');
+				}
+			}
+			// console.log(JSON.stringify(webglShortFunctionNames, null, '\t'));
+
+			let shader_program = gl.createProgram();
+			gl.attachShader(shader_program, r_compile_shader(gl.VERTEX_SHADER, R_SOURCE_VS));
+			gl.attachShader(shader_program, r_compile_shader(gl.FRAGMENT_SHADER, R_SOURCE_FS));
+			gl.linkProgram(shader_program);
+			gl.useProgram(shader_program);
+
+			r_u_camera = gl.getUniformLocation(shader_program, 'c');
+			r_u_lights = gl.getUniformLocation(shader_program, 'l');
+			r_u_mouse = gl.getUniformLocation(shader_program, 'm');
+			r_u_pos = gl.getUniformLocation(shader_program, 'mp');
+			r_u_rotation = gl.getUniformLocation(shader_program, 'mr');
+			r_u_frame_mix = gl.getUniformLocation(shader_program, 'f');
+			
+			gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+
+			r_vertex_attrib(shader_program, 'p', 3, 8, 0); // position
+			r_vertex_attrib(shader_program, 't', 2, 8, 3); // texture coord
+			r_vertex_attrib(shader_program, 'n', 3, 8, 5); // normals
+
+			r_va_p2 = r_vertex_attrib(shader_program, 'p2', 3, 8, 0); // mix position
+			r_va_n2 = r_vertex_attrib(shader_program, 'n2', 3, 8, 5); // mix normals
+
+			gl.enable(gl.DEPTH_TEST);
+			gl.enable(gl.BLEND);
+			gl.enable(gl.CULL_FACE);
+			gl.viewport(0,0,c.width,c.height);
+		},
+
+		r_compile_shader = (shader_type, shader_source) => {
+			let shader = gl.createShader(shader_type);
+			gl.shaderSource(shader, shader_source);
+			gl.compileShader(shader);
+			// console.log(gl.getShaderInfoLog(shader));
+			return shader;
+		},
+
+		r_vertex_attrib = (shader_program, attrib_name, count, vertex_size, offset) => {
+			let location = gl.getAttribLocation(shader_program, attrib_name);
+			gl.enableVertexAttribArray(location);
+			gl.vertexAttribPointer(location, count, gl.FLOAT, false, vertex_size * 4, offset * 4);
+			return location;
+		},
+
+		r_create_texture = (c) => {
+			let t = {t:gl.createTexture(), c};
+			gl.bindTexture(gl.TEXTURE_2D, t.t);
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, c);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+			gl.generateMipmap(gl.TEXTURE_2D);
+			r_textures.push(t);
+		},
+
+		r_prepare_frame = (r,g,b) => {
+			gl.clearColor(r,g,b,1);
+			gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+
+			r_num_lights = 0;
+			r_light_buffer.fill(0);
+		},
+
+		r_end_frame = () => {
+			gl.uniform4f(r_u_camera, r_camera.x, r_camera.y, r_camera.z, 16/9);
+			gl.uniform2f(r_u_mouse, r_camera_yaw, r_camera_pitch);
+			gl.uniform3fv(r_u_lights, r_light_buffer);
+
+			let vo = 0,
+				last_texture = -1;
+			for (let c of r_draw_calls) {
+				
+				// c = [x, y, z, yaw, pitch, texture, offset1, offset2, mix, length]
+
+				// Bind new texture only if it changed from the previous one. The map
+				// is sorted by texture indices, so this helps.
+				if (last_texture != c[5]) {
+					last_texture = c[5];
+					//gl.bindTexture(gl.TEXTURE_2D, r_textures[last_texture].t);
+				}
+
+				gl.uniform3f(r_u_pos, c[0], c[1], c[2]);//uniform3f 是OpenGL 或 WebGL 中用于向着色器程序传递浮点型向量数据的函数，专门用于设置一个包含三个浮点数的uniform变量。‌
+				//该函数的核心作用是‌在渲染前将数据（如颜色、偏移量等）从JavaScript或C++等主机代码传输到GPU上的着色器，uniform变量在一次绘制调用中对所有顶点或片段保持一致，适用于传递全局参数。‌
+				gl.uniform2f(r_u_rotation, c[3], c[4]);
+				gl.uniform1f(r_u_frame_mix, c[8]);
+
+				// If we have two different frames, calculate the offset from the
+				// drawArrays call to the mix frame.
+				// Setting the vertexAttribPointer is quite expensive, so we only
+				// do this if we have to; i.e. for animated models.
+				if (vo != (c[7]-c[6])) {
+					vo = (c[7]-c[6]);
+					gl.vertexAttribPointer(r_va_p2, 3, gl.FLOAT, false, 8 * 4, vo*8*4);
+					gl.vertexAttribPointer(r_va_n2, 3, gl.FLOAT, false, 8 * 4, (vo*8+5)*4);
+				}
+				gl.drawArrays(gl.TRIANGLES, c[6], c[9]);
+			}
+
+			// Reset draw calls
+			r_draw_calls = [];
+		},
+
+		r_draw = (pos, yaw, pitch, texture, f1, f2, mix, num_verts) => {
+			r_draw_calls.push([
+				pos.x, pos.y, pos.z, yaw, pitch,
+				texture, f1, f2, mix, num_verts
+			]);
+		},
+
+		r_submit_buffer = () => {
+			gl.bufferData(gl.ARRAY_BUFFER, r_buffer.subarray(0, r_num_verts*8), gl.STATIC_DRAW);
+		},
+
+		r_push_vert = (pos, normal, u, v) => {
+			r_buffer.set([pos.x, pos.y, pos.z, u, v, normal.x, normal.y, normal.z], r_num_verts * 8);
+			r_num_verts++;
+		},
+
+		r_push_quad = (v0, v1, v2, v3, u, v) => {
+			let n = vec3_face_normal(v0, v1, v2);
+			r_push_vert(v0, n, u, 0);
+			r_push_vert(v1, n, 0, 0);
+			r_push_vert(v2, n, u, v);
+			r_push_vert(v3, n, 0, v);
+			r_push_vert(v2, n, u, v);
+			r_push_vert(v1, n, 0, 0);
+		},
+
+		r_push_block = (x, y, z, sx, sy, sz, texture) => {
+			let canvas = r_textures[texture].c,
+				index = r_num_verts,
+				tx = sx/canvas.width,
+				ty = sy/canvas.height,
+				tz = sz/canvas.width,
+				
+				// top
+				v0 = vec3(x, y + sy, z),
+				v1 = vec3(x + sx, y + sy, z),
+				v2 = vec3(x, y + sy, z + sz),
+				v3 = vec3(x + sx, y + sy, z + sz),
+
+				// bottom
+				v4 = vec3(x, y, z + sz),
+				v5 = vec3(x + sx, y, z + sz),
+				v6 = vec3(x, y, z),
+				v7 = vec3(x + sx, y, z);
+
+			r_push_quad(v0, v1, v2, v3, tx, tz); // top
+			r_push_quad(v4, v5, v6, v7, tx, tz); // bottom
+			r_push_quad(v2, v3, v4, v5, tx, ty); // front
+			r_push_quad(v1, v0, v7, v6, tx, ty); // back
+			r_push_quad(v3, v1, v5, v7, tz, ty); // right
+			r_push_quad(v0, v2, v6, v4, tz, ty); // left
+			return index;
+		},
+
+		r_push_light = (pos, intensity, r, g, b) => {
+			// Calculate the distance to the light, fade it out between 768--1024
+			let fade = clamp(
+				scale(
+					vec3_dist(pos, r_camera), 
+					768, 1024, 1, 0
+				),
+				0, 1
+			) * intensity * 10;
+
+			if (fade && r_num_lights < R_MAX_LIGHT_V3/2) {
+				r_light_buffer.set([pos.x, pos.y, pos.z, r*fade, g*fade, b*fade], r_num_lights*6);
+				r_num_lights++;
+			}
+		};
+
+		let
+		map,
+		map_size = 128,
+
+		map_load_container = async (path) => {
+			/* Parse map container format
+				typedef struct {
+					u8 x, y, z;
+					u8 sx, sy, sz;
+				} block_t;
+
+				typedef struct {
+					u8 sentinel;
+					u8 tex;
+				} block_texture_t;
+
+				typedef struct {
+					char type;
+					u8 x, y, z;
+					u8 data1, data2;
+				} entity_t;
+
+				struct {
+					u16 blocks_size;
+					block_t blocks[];
+					u16 num_entities;
+					entity_t entities[num_entities];
+				} map_data;
+
+				Block data is interleaved with the block_texture_t struct to denote
+				the texture index to use for the following blocks.
+			*/
+
+			let data = new Uint8Array(await (await fetch(path)).arrayBuffer()),
+				maps = [];
+			for (let i = 0; i < data.length;) {
+				let blocks_size = data[i++] | (data[i++] << 8),
+					cm = new Uint8Array(map_size * map_size * map_size >> 3), // collision map
+					b = data.subarray(i, i += blocks_size),
+					r = [],
+					t;
+
+				// Parse block data and construct geometry and the collision map
+				for (let j = 0; j < b.length;) {
+
+					// First value is either the x coordinate or a texture change
+					// sentinel value (255) followed by the texture index
+					if (b[j] == 255) {
+						j++;
+						t = b[j++];
+					}
+					let 
+						 x = b[j++],  y = b[j++],  z = b[j++],
+						sx = b[j++], sy = b[j++], sz = b[j++];
+
+					// Submit the block to the render buffer; we get the vertex offset
+					// of this block within the buffer back, so we can draw it later
+					r.push({
+						t, 
+						b: r_push_block(
+							x << 5, y << 4, z << 5, 
+							sx << 5, sy << 4, sz << 5,
+							t
+						)
+					});
+					
+					// The collision map is a bitmap; 8 x blocks per byte
+					for (let cz = z; cz < z + sz; cz++) {
+						for (let cy = y; cy < y + sy; cy++) {
+							for (let cx = x; cx < x + sx; cx++) {
+								cm[
+									(
+										cz * map_size * map_size + 
+										cy * map_size + 
+										cx
+									) >> 3
+								] |= 1 << (cx & 7);
+							}
+						}
+					}
+				}
+
+				// Slice of entity data; we parse it when we actually spawn
+				// the entities in map_init()
+				let num_entities = data[i++] | (data[i++] << 8),
+					e = data.subarray(i, i += num_entities * 6 /*sizeof(entity_t)*/);
+				maps.push({cm, e, r});
+			}
+			return maps;
+		},
+
+		map_init = (m) => {
+			map = m;
+
+			// Entity Id to class - must be consistent with map_packer.c line ~900
+			//这里要注意，这里边的单位一定要包含assets/map/m1 m2.map里边的classname，不然初始化会报找不到
+			
+			let spawn_class = [
+				/* 00 */ entity_player_t,
+				/* 01 */ null, 
+				/* 02 */ null, 
+				/* 03 */ null, 
+				/* 04 */ null, 
+				/* 05 */ null, 
+				/* 06 */ null, 
+				/* 07 */ null, 
+				/* 08 */ null, 
+				/* 09 */ null, 
+				/* 10 */ null, 
+				/* 11 */ null, 
+				/* 12 */ null,
+				/* 13 */ null,
+				/* 14 */ null,
+				/* 15 */ null,
+				/* 16 */ null
+			];
+
+			// Parse entity data and spawn all entities for this map
+			for (let i = 0; i < map.e.length;) {
+				// console.log("m.e[i]: " + m.e[i]);
+				let type = spawn_class[m.e[i++]];
+				game_spawn(
+					type, 
+					vec3(m.e[i++] * 32, m.e[i++] * 16, m.e[i++] * 32), 
+					m.e[i++], m.e[i++]
+				);
+			}
+		},
+
+		map_block_at = (x, y, z) =>
+			map.cm[
+				(
+					z * map_size * map_size + 
+					y * map_size + 
+					x
+				) >> 3
+			] & (1 << (x & 7)),
+
+		map_trace = (a, b) => {
+			let diff = vec3_sub(b, a),
+				step_dir = vec3_mulf(vec3_normalize(diff), 16),
+				steps = vec3_length(diff)/16;
+
+			for (let i = 0; i < steps; i++) {
+				a = vec3_add(a, step_dir);
+				if (map_block_at(a.x >> 5, a.y >> 4, a.z >> 5)) {
+					return a;
+				}
+			}
+			return null;
+		},
+
+		map_block_at_box = (box_start, box_end) => {
+			for (let z = box_start.z >> 5; z <= box_end.z >> 5; z++) {
+				for (let y = box_start.y >> 4; y <= box_end.y >> 4; y++) {
+					for (let x = box_start.x >> 5; x <= box_end.x >> 5; x++) {
+						if (map_block_at(x, y, z)) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		},
+		map_draw = () => {
+			console.log("map.r.length: " + map.r.length + " " + time_self )
+			let p = vec3();
+			let i = 0;
+			for (let r of map.r) {
+				if ( i++ < time_self* 4)
+				{
+					console.log(time_self);
+					r_draw(p, 0, 0, r.t, r.b,r.b,0,36);
+				}
+				else
+					break;
+			}
+		};
+		
+		
+		
+		let ENTITY_GROUP_NONE = 0,
+			ENTITY_GROUP_PLAYER = 1,
+			ENTITY_GROUP_ENEMY = 2;
+		class entity_t {
+			constructor(pos, p1, p2) {
+				this.a = vec3();
+				this.v = vec3();
+				this.p = pos;
+				this.s = vec3(2,2,2);
+				this.f = 0;
+				// console.log("this.p.x: " + this.p.x +" y:" + this.p.y  + " z:" + this.p.z)
+				this._health = 50;
+				this._dead = 0;
+				this._die_at = 0;
+				this._step_height = 0;
+				this._bounciness = 0;
+				this._gravity = 1;
+				this._yaw = 0;
+				this._pitch = 0;
+				this._anim = [1, [0]];
+				this._anim_time = Math.random();
+				this._on_ground = 0;
+				this._keep_off_ledges = 0;
+				this._check_against = ENTITY_GROUP_NONE;
+				this._stepped_up_at = 0;
+				this._init(p1, p2);
+			}
+			_init(p1, p2) {}
+			_update() {
+				// console.log("this.p.x: " + this.p.x +" y:" + this.p.y  + " z:" + this.p.z)
+				if (this._model) {
+					this._draw_model();
+				}
+			}
+			_update_physics() {
+				if (this._die_at && this._die_at < game_time) {
+					this._kill();
+					return;
+				}
+				// Apply Gravity
+				this.a.y = -1200 * this._gravity;
+				// Integrate acceleration & friction into velocity
+				let ff = Math.min(this.f * game_tick, 1);
+				this.v = vec3_add(
+					this.v, vec3_sub(
+						vec3_mulf(this.a, game_tick), 
+						vec3_mul(this.v, vec3(ff, 0, ff))
+					)
+				);
+				// Set up the _check_entities array for entity collisions
+				this._check_entities = [
+					[], 
+					game_entities_friendly, 
+					game_entities_enemies
+				][this._check_against];
+				// Divide the physics integration into 16 unit steps; otherwise fast
+				// projectiles may just move through walls.
+				let 
+					original_step_height = this._step_height,
+					move_dist = vec3_mulf(this.v, game_tick),
+					steps = Math.ceil(vec3_length(move_dist) / 16),
+					move_step = vec3_mulf(move_dist, 1/steps);
+				for (let s = 0; s < steps; s++) {
+					// Remember last position so we can roll back
+					let lp = vec3_clone(this.p);
+					// Integrate velocity into position
+					this.p = vec3_add(this.p, move_step);
+					// Collision with walls, horizonal
+					if (this._collides(vec3(this.p.x, lp.y, lp.z))) {
+						// Can we step up?
+						if (
+							!this._step_height || !this._on_ground || this.v.y > 0 || 
+							this._collides(vec3(this.p.x, lp.y+this._step_height, lp.z))
+						) {
+							this._did_collide(0);
+							this.p.x = lp.x;
+							this.v.x = -this.v.x * this._bounciness;
+						}
+						else {
+							lp.y += this._step_height;
+							this._stepped_up_at = game_time;
+						}
+						s = steps; // stop after this iteration
+					}
+					// Collision with walls, vertical
+					if (this._collides(vec3(this.p.x, lp.y, this.p.z))) {
+						// Can we step up?
+						if (
+							!this._step_height || !this._on_ground || this.v.y > 0 || 
+							this._collides(vec3(this.p.x, lp.y+this._step_height, this.p.z))
+						) {
+							this._did_collide(2);
+							this.p.z = lp.z;
+							this.v.z = -this.v.z * this._bounciness;
+						}
+						else {
+							lp.y += this._step_height;
+							this._stepped_up_at = game_time;
+						}
+						s = steps; // stop after this iteration
+					}
+					// Collision with ground/Ceiling
+					if (this._collides(this.p)) {
+						this._did_collide(1);
+						this.p.y = lp.y;
+						// Only bounce from ground/ceiling if we have enough velocity
+						let bounce = Math.abs(this.v.y) > 200 ? this._bounciness : 0;
+						this._on_ground = this.v.y < 0 && !bounce;
+						this.v.y = -this.v.y * bounce;
+						s = steps; // stop after this iteration
+					}
+					this._step_height = original_step_height;
+				}
+			}
+			_collides(p) {
+				if (this._dead) {
+					return;
+				}
+				for (let entity of this._check_entities) {
+					if (vec3_dist(p, entity.p) < this.s.y + entity.s.y) {
+						// If we collide with an entity set the step height to 0,
+						// so we don't climb up on its shoulders :/
+						this._step_height = 0;
+						this._did_collide_with_entity(entity);
+						return true;
+					}
+				}
+				// Check if there's no block beneath this point. We want the AI to keep
+				// off of ledges.
+				if (
+					this._on_ground && this._keep_off_ledges &&
+					!map_block_at(p.x >> 5, (p.y-this.s.y-8) >> 4, p.z >>5) &&
+					!map_block_at(p.x >> 5, (p.y-this.s.y-24) >> 4, p.z >>5)
+				) {
+					return true;
+				}
+				// Do the normal collision check with the whole box
+				return map_block_at_box(vec3_sub(p, this.s), vec3_add(p, this.s));
+			}
+			_did_collide(axis) {}
+			_did_collide_with_entity(other) {}
+			_draw_model() {
+				this._anim_time += game_tick;
+				// Calculate which frames to use and how to mix them
+				let f = (this._anim_time / this._anim[0]),
+					mix = f - (f|0),
+					frame_cur = this._anim[1][(f|0) % this._anim[1].length],
+					frame_next = this._anim[1][((f+1)|0) % this._anim[1].length];
+				// Swap frames if we're looping to the first frame again
+				if (frame_next < frame_cur) {
+					[frame_next, frame_cur] = [frame_cur, frame_next];
+					mix = 1-mix;
+				}
+			}
+			_spawn_particles(amount, speed = 1, model, texture, lifetime) {
+				for (let i = 0; i < amount; i++) {
+					let particle = game_spawn(entity_particle_t, this.p);
+					particle._model = model;
+					particle._texture = texture;
+					particle._die_at = game_time + lifetime + Math.random() * lifetime * 0.2;
+					particle.v = vec3(
+						(Math.random() - 0.5) * speed,
+						Math.random() * speed,
+						(Math.random() - 0.5) * speed
+					);
+				}
+			}
+			_receive_damage(from, amount) {
+				if (this._dead) {
+					return;
+				}
+				//this._health -= amount; // will not died
+				// console.log("this._health: " + this._health)
+				if (this._health <= 0) {
+					this._kill();
+				}
+			}
+			_play_sound(sound) {
+				let volume = clamp(scale(vec3_dist(this.p, r_camera), 64, 1200, 1, 0),0,1),
+					pan = Math.sin(vec3_2d_angle(this.p, r_camera)-r_camera_yaw)*-1;
+				//audio_play(sound, volume, 0, pan);
+			}
+			_kill() {
+				this._dead = 1;
+			}
+		}
+		
+		class entity_player_t extends entity_t {
+			_init() {
+				this.s = vec3(12,24,12);
+				this.f = 10;
+				this._speed = 3000;
+				this._step_height = 17;
+				this._can_jump = 0;
+				this._can_shoot_at = 0;
+				this._health = 100;
+				this._check_against = ENTITY_GROUP_ENEMY;
+				//this._weapons = [new weapon_shotgun_t];
+				this._weapon_index = 0;
+				// Map 1 needs some rotation of the starting look-at direction
+				this._yaw += game_map_index * Math.PI; 
+				this._bob = 0;
+				game_entity_player = this;
+				game_entities_friendly.push(this);
+			}
+			_update() {
+				// console.log("entity_player_t this.p.x: " + this.p.x +" y:" + this.p.y  + " z:" + this.p.z)
+				let mvalue = 10
+				let michecked = false
+				// Mouse look
+				this._pitch = clamp(this._pitch + mouse_y * mvalue * (michecked ? -0.00015 : 0.00015), -1.5, 1.5);
+				this._yaw = (this._yaw + mouse_x * mvalue * 0.00015) % (Math.PI*2);
+				// Acceleration in movement direction
+				this.a = vec3_mulf(
+					vec3_rotate_y(
+						vec3(
+							keys[key_right] - keys[key_left],
+							0,
+							keys[key_up] - keys[key_down]
+						), 
+						this._yaw
+					), 
+					this._speed * (this._on_ground ? 1 : 0.3)
+				);
+				if (keys[key_jump] && this._on_ground && this._can_jump) {
+					this.v.y = 400;
+					this._on_ground = 0;
+					this._can_jump = 0;
+				}
+				if (!keys[key_jump]) {
+					this._can_jump = 1;
+				}
+				//this._weapon_index = (
+					//this._weapon_index + keys[key_next] + this._weapons.length - keys[key_prev]
+				//) % this._weapons.length;
+				//let shoot_wait = this._can_shoot_at - game_time,
+					//weapon = this._weapons[this._weapon_index];
+				// Shoot Weapon
+				
+				this._bob += vec3_length(this.a) * 0.0001;
+				this.f = this._on_ground ? 10 : 2.5;
+				this._update_physics();
+				r_camera.x = this.p.x;
+				r_camera.z = this.p.z;
+				// Smooth step up on stairs
+				r_camera.y = this.p.y + 8 - clamp(game_time - this._stepped_up_at, 0, 0.1) * -160;
+				r_camera_yaw = this._yaw;
+				r_camera_pitch = this._pitch;
+				// console.log("r_camera.x: " + r_camera.x +" y:" + r_camera.y  + " z:" + r_camera.z)
+				// Draw weapon at camera position at an offset and add the current
+				// recoil (calculated from shoot_wait and weapon._reload) accounting
+				// for the current view yaw/pitch
+				
+				// h.textContent = this._health|0;
+				// Debug: a light around the player
+				// r_push_light(vec3_add(this.p, vec3(0,64,0)), 10, 255, 192, 32);
+			}
+			_receive_damage(from, amount) {
+				//audio_play(sfx_hurt);
+				super._receive_damage(from, amount);
+			}
+			_kill() {
+				super._kill();
+				h.textContent = this._health|0;
+				// console.log('YOU DIED');
+				setTimeout(() => game_init(game_map_index), 2000);
+			}
+		}
+		
+		
+		let
+		game_tick = 0,
+		game_time = 0.016,
+		game_real_time_last,
+		game_message_timeout = 0,
+
+		game_entities,
+		game_entities_enemies,
+		game_entities_friendly,
+		game_entity_player,
+		game_map_index,
+		game_jump_to_next_level,
+
+		game_init = (map_index) => {
+			game_entities = [];
+			game_entities_enemies = [];
+			game_entities_friendly = [];
+
+			game_map_index = map_index;
+			map_init(map_data[game_map_index]);
+		},
+
+		game_next_level = () => {
+			game_jump_to_next_level = 1;
+		},
+
+		game_spawn = (type, pos, p1, p2) =>  {
+			let entity = new (type)(pos, p1, p2)
+			game_entities.push(entity);
+			return entity;
+		},
+
+		game_show_message = (text) => {
+			msg.textContent = text;
+			msg.style.display = 'block';
+			clearTimeout(game_message_timeout);
+			game_message_timeout = setTimeout(()=>msg.style.display = 'none', 2000);
+		},
+
+		game_run = (time_now) => {
+			requestAnimationFrame(game_run);
+
+			time_now *= 0.001;
+			time_self = time_now;
+			console.log(time_now)
+			game_tick = Math.min((time_now - (game_real_time_last||time_now)), 0.05);
+			game_real_time_last = time_now;
+			game_time += game_tick;
+
+			r_prepare_frame(0.1, 0.2, 0.5);
+
+			// Update and render entities
+			let alive_entities = [];
+			console.log("game_entities.length: " + game_entities.length)
+			for (let entity of game_entities) 
+			{
+				if (!entity._dead) 
+				{
+					entity._update();
+					alive_entities.push(entity);
+				}
+			}
+			game_entities = alive_entities;
+
+			map_draw();
+			r_end_frame();
+
+			// Reset mouse movement and buttons that should be pressed, not held.
+			mouse_x = mouse_y = 0;
+			keys[key_next] = keys[key_prev] = 0;
+
+			if (game_jump_to_next_level) {
+				game_jump_to_next_level = 0;
+				game_map_index++;
+				if (game_map_index == 2) {
+					// console.log('THE END'+ 'THANKS FOR PLAYING ❤');
+					h.textContent = a.textContent = '';
+					game_entity_player._dead = 1;
+
+					// Set camera position for end screen
+					r_camera = vec3(1856,784,2272);
+					r_camera_yaw = 0;
+					r_camera_pitch = 0.5;
+				}
+				else {
+					game_init(game_map_index);
+				}
+			}
+		};
+
+		let
+		map_data,
+
+		// Particles
+		model_explosion,
+		model_blood,
+		model_gib,
+		model_gib_pieces = [],
+
+		// Enemies
+		model_grunt,
+
+		// Map Objects
+		model_barrel,
+		model_torch,
+
+		// Pickups
+		model_door,
+
+		// Projectiles
+		model_grenade,
+		model_plasma, // aka. nail
+
+		// Sounds
+		sfx_enemy_hit,
+		sfx_enemy_gib,
+		sfx_enemy_hound_attack,
+
+		sfx_no_ammo,
+		sfx_hurt,
+		sfx_pickup,
+
+		sfx_plasma_shoot,
+
+		sfx_shotgun_shoot,
+		sfx_shotgun_reload,
+
+		sfx_nailgun_shoot,
+		sfx_nailgun_hit,
+
+		sfx_grenade_shoot,
+		sfx_grenade_bounce,
+		sfx_grenade_explode,
+
+		game_load = async () => {
+			r_init();
+
+			// Create textures
+			ttt(texture_data).map(r_create_texture);
+			
+			// Load map & model containers	
+			map_data = await map_load_container('map_data-only-map-and-one-player');
+
+			r_submit_buffer();
+			requestAnimationFrame(run_frame);
+
+			//f.onclick = () => g.requestFullscreen();
+			g.onclick = () => {
+				g.onclick = () => c.requestPointerLock();
+				g.onclick();
+				
+				//audio_play(audio_create_song(...music_data), 1, 1);
+				game_init(0);
+				run_frame = game_run;
+			};
+		},
+
+		run_frame = (time_now) => {
+			r_prepare_frame();
+
+			r_push_light(
+				vec3(Math.sin(time_now*0.00033)*200, 100, -100),
+				10, 255,192,32
+			);
+			r_push_light(
+				vec3_rotate_y(vec3(0, 0, 100),time_now*0.00063),
+				10, 32,64,255
+			);
+			r_push_light(
+				vec3_rotate_y(vec3(100, 0, 0),time_now*0.00053),
+				10, 196,128,255
+			);
+			
+			r_end_frame();
+			requestAnimationFrame(run_frame);//‌定义‌：requestAnimationFrame 通知浏览器在下一次重绘前调用指定回调函数更新动画，其执行频率自动匹配屏幕刷新率
+		};
+
+		game_load();
+	};
+
+	game_start();
+
+	</script>
+</html>
